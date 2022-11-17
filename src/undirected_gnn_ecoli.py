@@ -20,15 +20,15 @@ import torch
 
 os.environ['TORCH'] = torch.__version__
 print(torch.__version__)
-
 import pickle
-
+import pickle as pk
 import numpy as np
 import pandas as pd
 import torch.nn.functional as F
 from torch.nn import BatchNorm1d, Linear, ReLU, Sequential, Sigmoid
 from torch.optim import Adam
 from torch_geometric.data import DataLoader
+from torch_geometric.data import Data
 # from torch_geometric.nn import TopKPooling
 # from torch_geometric.nn import global_mean_pool
 from torch_geometric.nn import MLP, GCNConv, GINConv
@@ -40,7 +40,7 @@ from torch_geometric.nn import MLP, GCNConv, GINConv
 > ## <u>Data Preprocessing
 """
 
-import pickle as pk
+
 
 out_path = './output/METABOLIC_DATA/ecoli_network/'
 
@@ -55,7 +55,7 @@ S_matrix = pd.read_csv(out_path + 'datasets/S_matrix.csv', index_col=0)
 with open(out_path + '/linear_solutions/ecoli_graphs.pickle', 'rb') as b:
     graphs = pk.load(b)
 
-graphs
+
 
 S_bool = S_matrix[S_matrix == 0].fillna(1).to_numpy()
 """$RAG = \hat{S}^T \hat{S}$
@@ -78,11 +78,7 @@ edge_index = edge_index.reshape(2, 2204)
 edge_index = torch.from_numpy(edge_index)
 edge_index = edge_index.type(torch.LongTensor)
 
-from torch_geometric.data import Data
 
-bounds[0].shape
-
-# len(list(graphs.keys()))
 dictionary = {}
 for i, curr_bounds in enumerate(bounds):
 
@@ -301,10 +297,7 @@ def test():
 
 """#Data processing"""
 
-import pickle
 
-import numpy as np
-import pandas as pd
 
 data_folder = '../data/toy_data/'
 
@@ -314,13 +307,8 @@ with open(data_folder + 'toy_graphs.pickle', 'rb') as handle:
 with open(data_folder + 'node_features.pickle', 'rb') as handle:
     features = pickle.load(handle)
 
-features[0]
-features
-
 #edge index RAG
 RAG = pd.read_csv(data_folder + "toy_adjacency_matrix.csv", index_col=0)
-
-RAG
 
 edge_index = np.zeros([1, 2])
 for i, row in enumerate(RAG.index):
@@ -340,15 +328,8 @@ for j, graph in enumerate(list(graphs.items())):
 
     dictionary_features[j] = edge_features.reshape(2, 35)[0]
 
-edge_index
-
-graphs[4]
-
-dictionary_features[4]
-
 edge_feature_list = list(dictionary_features.values())
 
-len(list(graphs.keys()))
 """Convert from numpy to torch tensor
 
 """
@@ -359,9 +340,8 @@ edge_index = torch.from_numpy(edge_index)
 
 edge_index = edge_index.type(torch.LongTensor)
 
-edge_index.dtype
 
-from torch_geometric.data import Data
+
 """Data format: Data(edge_index=[2, num_edges], x=[num_nodes, feature_vector], y=[target_labels/correct_labels])"""
 
 # len(list(graphs.keys()))
@@ -374,7 +354,6 @@ for i in range(len(list(graphs.keys()))):
     key = "graph_" + str(i)
     dictionary[key] = data
 
-dictionary
 """#Recurrent GNN
 Do we need a hidden state? Can we stick to simple markov process where input state is node states and output is edge weight.
 
