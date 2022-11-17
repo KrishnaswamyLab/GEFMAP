@@ -24,9 +24,9 @@ with open('/content/drive/MyDrive/metabolic_graphs/1_node_features.pickle', 'rb'
 
 RAG = pd.read_csv("/content/drive/MyDrive/metabolic_graphs/toy_adjacency_matrix.csv", index_col=0)
 
-RAG
+# RAG
 
-list(graphs.items())[0]
+# list(graphs.items())[0]
 
-list(features.items())[0]
+# list(features.items())[0]
 
