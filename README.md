@@ -20,5 +20,6 @@ python -m pip install git+https://github.com/KrishnaswamyLab/Multiscale_PHATE
 ## Usage
 ```
 conda activate metabolic_graph
-
+cd src/
+## TO BE ADDED
 ```
