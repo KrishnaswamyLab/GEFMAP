@@ -4,7 +4,7 @@
 We are still cleaning up the code!
 
 ## Project Description
-The goad of this project is to model metabolic network activity from single cell RNA sequencing (scRNAseq) data. 
+The goal of this project is to model metabolic network activity from single cell RNA sequencing (scRNAseq) data. 
 Metabolic flux prediction has traditionally been done using a linear optimization method called [flux balance analysis (FBA)](https://pubmed.ncbi.nlm.nih.gov/33292061/). This relies on curated genome-scale metabolic models (GEM) that provide stoichiometry matrices (S matrices) quantifying the ratio of substrates (metabolites moving in) and products (metabolites moving out). A reaction rate vector v represents the rate of flux for each reaction. In order to satisfy mass conservation, the product of this rate vector v and the stoichiometry matrix S must be zero (Sv=0). In other words, the spectrum of all possible metabolic states is defined by the null space of this S matrix. 
 
 For a given system (e.g., individual cell) the user can select a reaction or set of reactions to optimize (maximize flux through). Given this objective function constrained by Sv=0, a linear solver can then predict the reaction rate vector v and flux rate for all reactions in the metabolic network. Other constraints can be added, for example upper and lower bounds for each reaction that depend on gene expression (expression of genes encoding enzymes that catalyze the reaction). 
