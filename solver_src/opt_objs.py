@@ -140,7 +140,7 @@ def main(args):
             count += batch_size
             preds = model(x)
             # unsupervised loss
-            train_loss = -torch.mean(preds*(x[:,-1]==-1)) + args.w*torch.mean(F.relu(x[:,0]-preds) + F.relu(preds-x[:,1])) #+ criterion(preds, y)
+            train_loss = -torch.mean(preds[:,args.target]) + args.w*torch.mean(F.relu(x[:,0]-preds) + F.relu(preds-x[:,1]))
             # supervised loss + unsupervised loss
             #train_loss = -torch.mean(preds[:,args.target]) + 10.0*torch.mean( F.relu(x[:,0]-preds) + F.relu(preds-x[:,1]) ) + criterion(preds, y)
             # supervised loss
