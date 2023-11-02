@@ -65,7 +65,7 @@ def train_MAGNET(model,train_data, optimizer, mse_loss, S_bool):
         stoich_ineq = torch.matmul(Smat, out.float())
         stoich_loss = mse_loss(stoich_ineq, torch.zeros(72))
         #Also run without the stoich loss
-        loss = mse_loss(out.double(), data.y)#*(0.8) + stoich_loss*(0.2)
+        loss = mse_loss(out.double(), data.y)
         globals()['stoich_ineq'] = stoich_ineq
         globals()['stoich_loss'] = stoich_loss
         globals()['out'] = out

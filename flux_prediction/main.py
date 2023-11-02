@@ -1,4 +1,5 @@
 from models.SGNN import SGNN, train_SGNN, test_SGNN
+from models.GCN import GCN, train_GCN, test_GCN
 from models.MAGNET import MAGNET, train_MAGNET, test_MAGNET
 from models.FCN import FCN, train, test
 from models.MLP import MLP, train_MLP, test_MLP
@@ -12,6 +13,8 @@ import numpy as np
 import logging
 import csv
 import time
+import pickle as pk
+from scipy.optimize import linprog
 
 def run(args):
     '''
@@ -56,25 +59,28 @@ def run(args):
     FCN: Fully Connected Network a.k.a Null Space Network that operates in the nullspace (WINNING METHOD!)
 
     Baselines:
-    SGNN: Graph Neural Network that treats the metabolic graph as undirected and incorporates the stoichiometric constraint in the loss function.
     MAGNET: Magnetic Laplacian based Directed Graph Neural Network
     MLP: Vanilla MLP with no constraints
+    GCN: GCN with no constraints
+    LINPROG: To produce ground truth solutions (NOT a baseline)
     '''
-    #################---SGNN---##########################
-    if args.model == "SGNN":
+    
+     #################---GCN---##########################
+    if args.model == "GCN":
         pcc_scores = []
         for i in range(5):
-            csv_file_name = "SGNN"+str(i)+args.data+".csv"
+            csv_file_name = "GCN"+str(i)+args.data+".csv"
             train_data, test_data = split_data(data, args.split, random_state=i) #Do train test split here
-            model = SGNN(input_features).to(dtype = torch.float64)
+            model = GCN(input_features)
             optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
             mse_loss = torch.nn.MSELoss()
+            
             for epoch in range(0,args.epochs):
-                loss = train_SGNN(model,train_data, optimizer, mse_loss, S_bool)
+                loss = train_GCN(model,train_data, optimizer, mse_loss)
                 logger.log(logging.INFO,f'Epoch {epoch + 1}, Train Loss: {loss:.4f}')
                 print(f'Epoch {epoch + 1}, Train Loss: {loss:.4f}')
 
-            acc, preds, labels = test_SGNN(model,test_data, mse_loss)
+            acc, preds, labels = test_GCN(model,test_data, mse_loss)
             file_contents = np.column_stack((preds, labels))
             with open(csv_file_name, 'w', newline='') as csv_file:
                 writer = csv.writer(csv_file)
@@ -96,11 +102,31 @@ def run(args):
         logger.log(logging.INFO,f"PCC: {mean_pcc:.3f} ± {std_dev:.3f}")
         print(f"PCC: {mean_pcc:.3f} ± {std_dev:.3f}")
 
+    #################---LINPROG---##########################
+    if args.model == "LINPROG":
+        with open('/home/sv496/project/flux_prediction/data/bounds_vals.pk', 'rb') as b:
+            bounds = pk.load(b)
+        
+        with open('/home/sv496/project/flux_prediction/data/c_vals.pk', 'rb') as c:
+            c_lst = pk.load(c)
+        runtime_lp = []
+        
+        for s, bounds in enumerate(bounds):
+            c = c_lst[s]
+            start_time_lp = time.time()
+            res = linprog(c,A_ub=None, b_ub=None, A_eq = S_matrix.to_numpy(), b_eq = np.zeros(S_matrix.shape[0]),
+                    bounds=bounds) #, method= method
+            runtime_lp.append(time.time() - start_time_lp)
+        
+        logger.log(logging.INFO,f"Runtime: {np.mean(runtime_lp):.3f} ± {np.std(runtime_lp):.3f}")
+        print("DONE!")
+
    #################---FCN---########################## 
     if args.model == "FCN":
+        
         pcc_scores = []
         # runtime_scores = []
-        for i in range(5):
+        for i in range(1):
             # start_time = time.time()
             csv_file_name = "NullSpaceNetwork"+str(i)+args.data+".csv"
             train_data, val_data, test_data, ns = process_data_FCN(data, S_matrix, randomseed=i)
@@ -114,7 +140,10 @@ def run(args):
                 logger.log(logging.INFO,loss)
                 print(loss)
             
-            acc, preds, labels = test(model, test_data)
+            acc, preds, labels, runtime = test(model, test_data)
+            # end_time = time.time()
+
+            logger.log(logging.INFO,f"Runtime: {np.mean(runtime):.3f} ± {np.std(runtime):.3f}")
             #Save outputs and solutions in a csv file
             file_contents = np.column_stack((preds, labels))
             with open(csv_file_name, 'w', newline='') as csv_file:
@@ -184,6 +213,7 @@ def run(args):
             optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
             for epoch in range(0,args.epochs):
                 loss = train_MLP(model, train_data, val_data, optimizer, epoch, args.epochs)
+                logger.log(logging.INFO,loss)
                 print(loss)
             acc, preds, labels = test_MLP(model, test_data)
             file_contents = np.column_stack((preds, labels))
@@ -227,6 +257,9 @@ if __name__ == "__main__":
                         default=0.2,
                         help='Train test split (default:0.2)'
                         )
+    parser.add_argument('--alpha', type=float,
+                        default = 0.25,
+                        help='Stoich loss value (default:0.25)')
     args = parser.parse_args()
 
     run(args)

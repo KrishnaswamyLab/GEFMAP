@@ -127,6 +127,7 @@ def test(model, test_data, log_str_full = ''):
     results['bound']=[]
     results['M_label'] = []
     results['M_pred'] = []
+    runtime = []
     loss_test = 0.0
     count = 0
     sum_y = 0
@@ -135,7 +136,9 @@ def test(model, test_data, log_str_full = ''):
             x, y = x.to(device), y.to(device)
             batch_size = x.shape[0]
             count += batch_size
+            start_time_FCN = time.time()
             preds = model(x)
+            runtime.append(time.time() - start_time_FCN)
             preds = preds.unsqueeze(2)
             val_loss = loss(preds, y)
             # print(i)
@@ -163,4 +166,4 @@ def test(model, test_data, log_str_full = ''):
     outstrtest = 'Test loss:, %.6f, ' % (loss_test)
     log_str_full += outstrtest
     # print(outstrtest)
-    return outstrtest, results['pred'].flatten(), results['label'].flatten()
+    return outstrtest, results['pred'].flatten(), results['label'].flatten(), runtime

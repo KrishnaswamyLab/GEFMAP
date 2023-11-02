@@ -1,0 +1,21 @@
+/var/spool/slurmd/job13709875/slurm_script: line 10: cd: /home/sv496/project/metabolic_graph: No such file or directory
+
+CommandNotFoundError: Your shell has not been properly configured to use 'conda deactivate'.
+To initialize your shell, run
+
+    $ conda init <SHELL_NAME>
+
+Currently supported shells are:
+  - bash
+  - fish
+  - tcsh
+  - xonsh
+  - zsh
+  - powershell
+
+See 'conda init --help' for more information and options.
+
+IMPORTANT: You may need to close and restart your shell after running 'conda init'.
+
+
+INFO:Logger:Runtime: 0.002 ± 0.000

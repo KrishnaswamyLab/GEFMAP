@@ -1,0 +1,27 @@
+/var/spool/slurmd/job13703548/slurm_script: line 9: SECONDS: command not found
+/var/spool/slurmd/job13703548/slurm_script: line 10: cd: /home/sv496/project/metabolic_graph: No such file or directory
+
+CommandNotFoundError: Your shell has not been properly configured to use 'conda deactivate'.
+To initialize your shell, run
+
+    $ conda init <SHELL_NAME>
+
+Currently supported shells are:
+  - bash
+  - fish
+  - tcsh
+  - xonsh
+  - zsh
+  - powershell
+
+See 'conda init --help' for more information and options.
+
+IMPORTANT: You may need to close and restart your shell after running 'conda init'.
+
+
+Traceback (most recent call last):
+  File "/gpfs/gibbs/project/krishnaswamy_smita/sv496/flux_prediction/main.py", line 272, in <module>
+    run(args)
+  File "/gpfs/gibbs/project/krishnaswamy_smita/sv496/flux_prediction/main.py", line 187, in run
+    loss = train_MAGNET(model,train_data, optimizer, mse_loss, S_bool, args.alpha)
+TypeError: train_MAGNET() takes 5 positional arguments but 6 were given

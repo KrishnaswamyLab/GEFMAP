@@ -1,0 +1,123 @@
+/var/spool/slurmd/job13707291/slurm_script: line 10: cd: /home/sv496/project/metabolic_graph: No such file or directory
+
+CommandNotFoundError: Your shell has not been properly configured to use 'conda deactivate'.
+To initialize your shell, run
+
+    $ conda init <SHELL_NAME>
+
+Currently supported shells are:
+  - bash
+  - fish
+  - tcsh
+  - xonsh
+  - zsh
+  - powershell
+
+See 'conda init --help' for more information and options.
+
+IMPORTANT: You may need to close and restart your shell after running 'conda init'.
+
+
+INFO:Logger:0, / ,100, epoch,Train loss:, 60.893982, Val loss:, 32.886153, --- 7.6960 seconds --- lr: 0.01
+INFO:Logger:1, / ,100, epoch,Train loss:, 31.197802, Val loss:, 29.963782, --- 8.7061 seconds --- lr: 0.01
+INFO:Logger:2, / ,100, epoch,Train loss:, 28.352860, Val loss:, 27.224529, --- 6.4815 seconds --- lr: 0.01
+INFO:Logger:3, / ,100, epoch,Train loss:, 25.722116, Val loss:, 24.720647, --- 7.9435 seconds --- lr: 0.01
+INFO:Logger:4, / ,100, epoch,Train loss:, 23.327383, Val loss:, 22.453955, --- 5.3814 seconds --- lr: 0.01
+INFO:Logger:5, / ,100, epoch,Train loss:, 21.154117, Val loss:, 20.397459, --- 5.6618 seconds --- lr: 0.01
+INFO:Logger:6, / ,100, epoch,Train loss:, 19.198442, Val loss:, 18.547530, --- 6.4532 seconds --- lr: 0.01
+INFO:Logger:7, / ,100, epoch,Train loss:, 17.439646, Val loss:, 16.895200, --- 7.0689 seconds --- lr: 0.01
+INFO:Logger:8, / ,100, epoch,Train loss:, 15.865692, Val loss:, 15.419217, --- 6.4543 seconds --- lr: 0.01
+INFO:Logger:9, / ,100, epoch,Train loss:, 14.457273, Val loss:, 14.089846, --- 6.3652 seconds --- lr: 0.01
+INFO:Logger:10, / ,100, epoch,Train loss:, 13.199724, Val loss:, 12.910774, --- 5.2774 seconds --- lr: 0.01
+INFO:Logger:11, / ,100, epoch,Train loss:, 12.077668, Val loss:, 11.858331, --- 6.3315 seconds --- lr: 0.01
+INFO:Logger:12, / ,100, epoch,Train loss:, 11.079844, Val loss:, 10.923288, --- 6.0481 seconds --- lr: 0.01
+INFO:Logger:13, / ,100, epoch,Train loss:, 10.195461, Val loss:, 10.094294, --- 6.0603 seconds --- lr: 0.01
+INFO:Logger:14, / ,100, epoch,Train loss:, 9.413694, Val loss:, 9.365166, --- 7.5719 seconds --- lr: 0.01
+INFO:Logger:15, / ,100, epoch,Train loss:, 8.718537, Val loss:, 8.716563, --- 3.1662 seconds --- lr: 0.01
+INFO:Logger:16, / ,100, epoch,Train loss:, 8.106537, Val loss:, 8.143760, --- 6.5574 seconds --- lr: 0.01
+INFO:Logger:17, / ,100, epoch,Train loss:, 7.566518, Val loss:, 7.639482, --- 7.6026 seconds --- lr: 0.01
+INFO:Logger:18, / ,100, epoch,Train loss:, 7.094369, Val loss:, 7.198516, --- 6.9586 seconds --- lr: 0.01
+INFO:Logger:19, / ,100, epoch,Train loss:, 6.678486, Val loss:, 6.807499, --- 4.8522 seconds --- lr: 0.01
+INFO:Logger:20, / ,100, epoch,Train loss:, 6.313239, Val loss:, 6.470018, --- 7.6507 seconds --- lr: 0.01
+INFO:Logger:21, / ,100, epoch,Train loss:, 5.992312, Val loss:, 6.168747, --- 6.9887 seconds --- lr: 0.01
+INFO:Logger:22, / ,100, epoch,Train loss:, 5.711790, Val loss:, 5.907392, --- 6.6394 seconds --- lr: 0.01
+INFO:Logger:23, / ,100, epoch,Train loss:, 5.466602, Val loss:, 5.679653, --- 7.2940 seconds --- lr: 0.01
+INFO:Logger:24, / ,100, epoch,Train loss:, 5.252879, Val loss:, 5.474930, --- 7.1163 seconds --- lr: 0.01
+INFO:Logger:25, / ,100, epoch,Train loss:, 5.065740, Val loss:, 5.300325, --- 7.3736 seconds --- lr: 0.01
+INFO:Logger:26, / ,100, epoch,Train loss:, 4.904775, Val loss:, 5.152772, --- 7.2197 seconds --- lr: 0.01
+INFO:Logger:27, / ,100, epoch,Train loss:, 4.763194, Val loss:, 5.016071, --- 6.3123 seconds --- lr: 0.01
+INFO:Logger:28, / ,100, epoch,Train loss:, 4.639927, Val loss:, 4.900789, --- 6.3215 seconds --- lr: 0.01
+INFO:Logger:29, / ,100, epoch,Train loss:, 4.534603, Val loss:, 4.801812, --- 7.0215 seconds --- lr: 0.01
+INFO:Logger:30, / ,100, epoch,Train loss:, 4.443624, Val loss:, 4.715059, --- 5.9076 seconds --- lr: 0.01
+INFO:Logger:31, / ,100, epoch,Train loss:, 4.365367, Val loss:, 4.639629, --- 7.3934 seconds --- lr: 0.01
+INFO:Logger:32, / ,100, epoch,Train loss:, 4.296572, Val loss:, 4.574624, --- 5.7285 seconds --- lr: 0.01
+INFO:Logger:33, / ,100, epoch,Train loss:, 4.238343, Val loss:, 4.518842, --- 7.3773 seconds --- lr: 0.01
+INFO:Logger:34, / ,100, epoch,Train loss:, 4.188147, Val loss:, 4.470156, --- 6.5617 seconds --- lr: 0.01
+INFO:Logger:35, / ,100, epoch,Train loss:, 4.145499, Val loss:, 4.427993, --- 6.0074 seconds --- lr: 0.01
+INFO:Logger:36, / ,100, epoch,Train loss:, 4.110140, Val loss:, 4.393755, --- 6.2467 seconds --- lr: 0.01
+INFO:Logger:37, / ,100, epoch,Train loss:, 4.080010, Val loss:, 4.363908, --- 6.8854 seconds --- lr: 0.01
+INFO:Logger:38, / ,100, epoch,Train loss:, 4.054375, Val loss:, 4.338873, --- 5.6059 seconds --- lr: 0.01
+INFO:Logger:39, / ,100, epoch,Train loss:, 4.033594, Val loss:, 4.318530, --- 6.8830 seconds --- lr: 0.01
+INFO:Logger:40, / ,100, epoch,Train loss:, 4.016247, Val loss:, 4.302119, --- 6.0011 seconds --- lr: 0.01
+INFO:Logger:41, / ,100, epoch,Train loss:, 4.002058, Val loss:, 4.286486, --- 6.7691 seconds --- lr: 0.01
+INFO:Logger:42, / ,100, epoch,Train loss:, 3.989559, Val loss:, 4.272730, --- 7.1913 seconds --- lr: 0.01
+INFO:Logger:43, / ,100, epoch,Train loss:, 3.979827, Val loss:, 4.264334, --- 6.6491 seconds --- lr: 0.01
+INFO:Logger:44, / ,100, epoch,Train loss:, 3.971717, Val loss:, 4.256114, --- 6.5791 seconds --- lr: 0.01
+INFO:Logger:45, / ,100, epoch,Train loss:, 3.965366, Val loss:, 4.248151, --- 5.8610 seconds --- lr: 0.01
+INFO:Logger:46, / ,100, epoch,Train loss:, 3.960573, Val loss:, 4.242461, --- 7.8413 seconds --- lr: 0.01
+INFO:Logger:47, / ,100, epoch,Train loss:, 3.956125, Val loss:, 4.237811, --- 7.1971 seconds --- lr: 0.01
+INFO:Logger:48, / ,100, epoch,Train loss:, 3.952770, Val loss:, 4.234440, --- 6.9818 seconds --- lr: 0.01
+INFO:Logger:49, / ,100, epoch,Train loss:, 3.950081, Val loss:, 4.231823, --- 6.8130 seconds --- lr: 0.01
+INFO:Logger:50, / ,100, epoch,Train loss:, 3.948267, Val loss:, 4.228370, --- 6.1763 seconds --- lr: 0.01
+INFO:Logger:51, / ,100, epoch,Train loss:, 3.946940, Val loss:, 4.225939, --- 6.6358 seconds --- lr: 0.01
+INFO:Logger:52, / ,100, epoch,Train loss:, 3.945846, Val loss:, 4.226427, --- 6.8745 seconds --- lr: 0.01
+INFO:Logger:53, / ,100, epoch,Train loss:, 3.944932, Val loss:, 4.223579, --- 6.9077 seconds --- lr: 0.01
+INFO:Logger:54, / ,100, epoch,Train loss:, 3.944660, Val loss:, 4.223954, --- 7.0543 seconds --- lr: 0.01
+INFO:Logger:55, / ,100, epoch,Train loss:, 3.944131, Val loss:, 4.222070, --- 6.8068 seconds --- lr: 0.01
+INFO:Logger:56, / ,100, epoch,Train loss:, 3.943409, Val loss:, 4.221908, --- 6.8744 seconds --- lr: 0.01
+INFO:Logger:57, / ,100, epoch,Train loss:, 3.943427, Val loss:, 4.220600, --- 6.4782 seconds --- lr: 0.01
+INFO:Logger:58, / ,100, epoch,Train loss:, 3.942864, Val loss:, 4.221224, --- 7.6463 seconds --- lr: 0.01
+INFO:Logger:59, / ,100, epoch,Train loss:, 3.942804, Val loss:, 4.221057, --- 7.4795 seconds --- lr: 0.01
+INFO:Logger:60, / ,100, epoch,Train loss:, 3.943539, Val loss:, 4.220653, --- 6.8727 seconds --- lr: 0.01
+INFO:Logger:61, / ,100, epoch,Train loss:, 3.942880, Val loss:, 4.220446, --- 6.8757 seconds --- lr: 0.01
+INFO:Logger:62, / ,100, epoch,Train loss:, 3.942643, Val loss:, 4.218842, --- 5.9747 seconds --- lr: 0.01
+INFO:Logger:63, / ,100, epoch,Train loss:, 3.942989, Val loss:, 4.219496, --- 4.6644 seconds --- lr: 0.01
+INFO:Logger:64, / ,100, epoch,Train loss:, 3.942927, Val loss:, 4.220039, --- 6.8587 seconds --- lr: 0.01
+INFO:Logger:65, / ,100, epoch,Train loss:, 3.942555, Val loss:, 4.219480, --- 6.3210 seconds --- lr: 0.01
+INFO:Logger:66, / ,100, epoch,Train loss:, 3.943156, Val loss:, 4.217595, --- 5.6828 seconds --- lr: 0.01
+INFO:Logger:67, / ,100, epoch,Train loss:, 3.942746, Val loss:, 4.220134, --- 7.2872 seconds --- lr: 0.01
+INFO:Logger:68, / ,100, epoch,Train loss:, 3.943018, Val loss:, 4.219416, --- 6.7337 seconds --- lr: 0.01
+INFO:Logger:69, / ,100, epoch,Train loss:, 3.943039, Val loss:, 4.220602, --- 7.4782 seconds --- lr: 0.01
+INFO:Logger:70, / ,100, epoch,Train loss:, 3.943851, Val loss:, 4.222737, --- 5.8829 seconds --- lr: 0.01
+INFO:Logger:71, / ,100, epoch,Train loss:, 3.942420, Val loss:, 4.217570, --- 7.8746 seconds --- lr: 0.01
+INFO:Logger:72, / ,100, epoch,Train loss:, 3.942905, Val loss:, 4.216910, --- 7.5914 seconds --- lr: 0.01
+INFO:Logger:73, / ,100, epoch,Train loss:, 3.942872, Val loss:, 4.220030, --- 6.6247 seconds --- lr: 0.01
+INFO:Logger:74, / ,100, epoch,Train loss:, 3.943089, Val loss:, 4.218526, --- 7.9447 seconds --- lr: 0.01
+INFO:Logger:75, / ,100, epoch,Train loss:, 3.942968, Val loss:, 4.218878, --- 6.1169 seconds --- lr: 0.01
+INFO:Logger:76, / ,100, epoch,Train loss:, 3.942704, Val loss:, 4.219207, --- 6.4756 seconds --- lr: 0.01
+INFO:Logger:77, / ,100, epoch,Train loss:, 3.942649, Val loss:, 4.220364, --- 5.2004 seconds --- lr: 0.01
+INFO:Logger:78, / ,100, epoch,Train loss:, 3.942952, Val loss:, 4.219730, --- 5.9892 seconds --- lr: 0.01
+INFO:Logger:79, / ,100, epoch,Train loss:, 3.943098, Val loss:, 4.220099, --- 6.1181 seconds --- lr: 0.01
+INFO:Logger:80, / ,100, epoch,Train loss:, 3.942683, Val loss:, 4.219105, --- 5.7788 seconds --- lr: 0.01
+INFO:Logger:81, / ,100, epoch,Train loss:, 3.943081, Val loss:, 4.219914, --- 6.1336 seconds --- lr: 0.01
+INFO:Logger:82, / ,100, epoch,Train loss:, 3.942827, Val loss:, 4.220469, --- 5.5252 seconds --- lr: 0.01
+INFO:Logger:83, / ,100, epoch,Train loss:, 3.943043, Val loss:, 4.222464, --- 6.5434 seconds --- lr: 0.01
+INFO:Logger:84, / ,100, epoch,Train loss:, 3.942948, Val loss:, 4.220931, --- 7.1528 seconds --- lr: 0.01
+INFO:Logger:85, / ,100, epoch,Train loss:, 3.943018, Val loss:, 4.218777, --- 6.4318 seconds --- lr: 0.01
+INFO:Logger:86, / ,100, epoch,Train loss:, 3.943679, Val loss:, 4.218113, --- 6.5216 seconds --- lr: 0.01
+INFO:Logger:87, / ,100, epoch,Train loss:, 3.943333, Val loss:, 4.217712, --- 5.9677 seconds --- lr: 0.01
+INFO:Logger:88, / ,100, epoch,Train loss:, 3.942930, Val loss:, 4.220848, --- 7.5628 seconds --- lr: 0.01
+INFO:Logger:89, / ,100, epoch,Train loss:, 3.943253, Val loss:, 4.219435, --- 5.6607 seconds --- lr: 0.01
+INFO:Logger:90, / ,100, epoch,Train loss:, 3.943396, Val loss:, 4.219653, --- 6.7090 seconds --- lr: 0.01
+INFO:Logger:91, / ,100, epoch,Train loss:, 3.943405, Val loss:, 4.219799, --- 6.8419 seconds --- lr: 0.01
+INFO:Logger:92, / ,100, epoch,Train loss:, 3.942872, Val loss:, 4.220323, --- 6.3239 seconds --- lr: 0.01
+INFO:Logger:93, / ,100, epoch,Train loss:, 3.943299, Val loss:, 4.220963, --- 6.5157 seconds --- lr: 0.01
+INFO:Logger:94, / ,100, epoch,Train loss:, 3.943427, Val loss:, 4.218623, --- 6.6770 seconds --- lr: 0.01
+INFO:Logger:95, / ,100, epoch,Train loss:, 3.943358, Val loss:, 4.219164, --- 6.7179 seconds --- lr: 0.01
+INFO:Logger:96, / ,100, epoch,Train loss:, 3.943848, Val loss:, 4.222854, --- 6.2426 seconds --- lr: 0.01
+INFO:Logger:97, / ,100, epoch,Train loss:, 3.943600, Val loss:, 4.219412, --- 5.9152 seconds --- lr: 0.01
+INFO:Logger:98, / ,100, epoch,Train loss:, 3.942867, Val loss:, 4.221273, --- 6.2500 seconds --- lr: 0.01
+INFO:Logger:99, / ,100, epoch,Train loss:, 3.943023, Val loss:, 4.219352, --- 8.0352 seconds --- lr: 0.01
+INFO:Logger:0.1698164939880371
+INFO:Logger:Test loss:, 0.035576, 
+INFO:Logger:PCC: 0.939 ± 0.000
