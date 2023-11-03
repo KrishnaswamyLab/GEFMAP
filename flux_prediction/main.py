@@ -1,4 +1,3 @@
-from models.SGNN import SGNN, train_SGNN, test_SGNN
 from models.GCN import GCN, train_GCN, test_GCN
 from models.MAGNET import MAGNET, train_MAGNET, test_MAGNET
 from models.FCN import FCN, train, test
@@ -19,9 +18,12 @@ from scipy.optimize import linprog
 def run(args):
     '''
     Load and pre-process data
+
+    Synthetic toy data: 8 reactions and 12 metabolites
+    Augmented E.coli data: 95 reactions and 72 metabolites
     '''
     if args.data == 'ecoli':
-        out_path = '/home/sv496/project/flux_prediction/data/E.coli_data/'
+        out_path = 'data/E.coli_data/'
         bounds = 'aug_NN_features.pk'
         S_matrix = 'S_matrix.csv'
         bounds, solutions, S_matrix, RAG = load_data(out_path, bounds, args.solution, S_matrix)
@@ -33,7 +35,7 @@ def run(args):
         kernel = 2
     
     elif args.data == 'toy':
-        out_path = '/home/sv496/project/flux_prediction/data/Toy_data/'
+        out_path = 'data/Toy_data/'
         bounds = '1_node_features.pickle'
         solutions = 'toy_FBA_solutions.pickle'
         RAG = 'toy_adjacency_matrix.csv'
@@ -56,13 +58,15 @@ def run(args):
     Output: Solutions/ Flux vector v
 
     Main method:
-    FCN: Fully Connected Network a.k.a Null Space Network that operates in the nullspace (WINNING METHOD!)
+    FCN: Fully Connected MLP a.k.a Null Space Network that operates in the nullspace (WINNING METHOD!)
 
     Baselines:
     MAGNET: Magnetic Laplacian based Directed Graph Neural Network
     MLP: Vanilla MLP with no constraints
     GCN: GCN with no constraints
-    LINPROG: To produce ground truth solutions (NOT a baseline)
+
+    Ground truth for the optimization problem:
+    LINPROG: SciPy Optimize function
     '''
     
      #################---GCN---##########################
@@ -104,10 +108,10 @@ def run(args):
 
     #################---LINPROG---##########################
     if args.model == "LINPROG":
-        with open('/home/sv496/project/flux_prediction/data/bounds_vals.pk', 'rb') as b:
+        with open('data/bounds_vals.pk', 'rb') as b:
             bounds = pk.load(b)
         
-        with open('/home/sv496/project/flux_prediction/data/c_vals.pk', 'rb') as c:
+        with open('data/c_vals.pk', 'rb') as c:
             c_lst = pk.load(c)
         runtime_lp = []
         
@@ -257,9 +261,6 @@ if __name__ == "__main__":
                         default=0.2,
                         help='Train test split (default:0.2)'
                         )
-    parser.add_argument('--alpha', type=float,
-                        default = 0.25,
-                        help='Stoich loss value (default:0.25)')
     args = parser.parse_args()
 
     run(args)
