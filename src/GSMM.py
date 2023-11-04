@@ -1,11 +1,17 @@
 from utils import *
 
-from tqdm import tqdm
 import libsbml
-from six import string_types
 import scipy
+import networkx as nx
+
+
+
+##############################################################################
+############################################################################## init
 
 from tabulate import tabulate
+from six import string_types
+
 
 models = {['ECOLI_core', 'mus_musculus', 'homo_sapiens'][i]:org for i, org in 
           enumerate(['e_coli_core_SBML3.xml', 'mus_iMM1415.xml', 'Recon3D.xml'])}
@@ -14,16 +20,14 @@ models_ = tabulate(list(models.items()), ['ORGANISM', 'MODEL_SBML'],tablefmt="gr
 
 
 
-##############################################################################
-#metabolic models from sbml
-##############################################################################
+############################################################ 
+############################################################ from sbml
 
 class association(object):
     def __init__(self):
         self.type = ''
         self.gene = ''
         self.children = []
-
 
     
 def map_bool(gene_association, data):
@@ -41,10 +45,11 @@ def map_bool(gene_association, data):
     return  rexp 
 
 
+
 class Reaction(object): 
     '''for type XML, HS_currrent
     '''
-    def __init__(self, sbml_reaction, xml_params):
+    def __init__(self, sbml_reaction, xml_params, convert = False, convert_dict = None):
         self.sbml_reaction = sbml_reaction
         self.fbc = sbml_reaction.getPlugin('fbc')
         self.id = sbml_reaction.id
@@ -107,10 +112,8 @@ class Reaction(object):
         
         genes = []
         
-        if self.gene_associations is None:
-            self.reaction_expression = None
         
-        elif self.gene_associations is not None:
+        if self.gene_associations is not None:
             gene_association = self.gene_associations
 
             try:
@@ -150,15 +153,20 @@ class Reaction(object):
                         gexp_f1 = np.min(gexp_f1, axis = 0)
                     elif ac.type == 'or':
                         gexp_f1 = np.max(gexp_f1, axis = 0)
-
+                    
                     rexp.append(gexp_f1)
 
                 if gene_association.type == 'and':
                     rexp = np.min(rexp, axis = 0)
                 elif gene_association.type == 'or':
                     rexp = np.max(rexp, axis = 0) 
-
-                self.reaction_expression = rexp
+                
+                if rexp is not None:
+                    self.reaction_expression = rexp
+        
+        elif self.gene_associations is None:
+            self.reaction_expression = None
+        
         self.genes = genes
 
         
@@ -177,10 +185,12 @@ def reaction_genes(q):
         gene_associations.children = [reaction_genes(ac) for ac in q.getListOfAssociations()]
 
     if isinstance(q, libsbml.GeneProductRef):
-        gp = q.getGeneProduct().split('_')[1].upper()
+        gp = q.getGeneProduct().split('_')[1].upper() #use for e.coli
+        #human convert gp from entrez to symbol
         gene_associations.type = 'gene'
         gene_associations.gene = gp
         gene_associations.children = None
+        
 
     return gene_associations
             
@@ -237,7 +247,10 @@ class metabolic_model(object):
             v = gp.getId() #change to match gene expression data
             val = str(v).split('_')[1].upper()
             self.genes[key] = val
-            
+        
+        #if self.model_name == 'homo_sapiens':
+        #   print('converting gene IDs.........')
+        #    self.genes = {y:x for x, y in list(self.genes.items())}
         ############ add metabolites (species) ############
         
         for mt in self.model.getListOfSpecies():
@@ -291,9 +304,9 @@ class metabolic_model(object):
 
 
 
-##############################################################################
-#incorporating gene expression data
-##############################################################################
+
+############################################################ 
+############################################################ transcript mapping
     
 
 #map genes to reactions
@@ -312,7 +325,11 @@ def map_reactions(model, data):
 
 #scale
 def scale_reaction_matrix(reaction_exp_matrix, gene_exp_scale, plot = False):
+    df = reaction_exp_matrix
+    nan_columns = df.columns[df.isna().any()].tolist()
+    missing_gene_mask = column_indices_with_nan = [df.columns.get_loc(col) for col in nan_columns]
 
+    reaction_exp_matrix = reaction_exp_matrix.fillna(0)
     from sklearn.preprocessing import normalize
     R = normalize(reaction_exp_matrix, norm="l1", axis=1, return_norm=False)
     R = pd.DataFrame(R, index = reaction_exp_matrix.index, columns = reaction_exp_matrix.columns)
@@ -351,3 +368,119 @@ def merge_tx_model(model, R, srm, plot = False):
     
 
     return R, srm
+
+
+
+
+
+
+############################################################ 
+############################################################ storage univ graph class
+
+class base_graph():
+    def __init__(self, G, metabolic_model):
+        self.m_model = metabolic_model
+        self.G = G
+        self.N = len(G.nodes)
+        I_n =sp.eye(self.N)
+        self.I_n = sparse_mx_to_torch_sparse_tensor(I_n)
+        self.edge_list = G2edgeindex(G)
+        self.edge_index = torch.transpose(torch.tensor(self.edge_list,dtype=torch.long),0,1)
+        adjmatrix = to_sparse_mx(self.edge_index, self.N)
+        adjmatrix = sparse_mx_to_torch_sparse_tensor(adjmatrix)
+
+        self.Fullm = torch.ones(self.I_n.size(0),self.I_n.size(1)) - self.I_n 
+        self.W = adjmatrix + self.I_n
+        self.W_complement = self.Fullm - self.W
+    
+
+    def get_universal_features(self):
+        graphs = {}
+        contg = nx.is_connected(self.G)
+        _eccen = []
+        _cluter = []
+
+        if contg:
+            for j in self.G.nodes:
+                try:
+                    _eccen += [nx.eccentricity(self.G,j)]
+                    _cluter += [nx.clustering(self.G,j)]
+                except:
+                    print("{j}th is Wrong")
+                    _eccen +=[0]
+                    _cluter += [0]
+            self._eccen = _eccen
+            self._cluter = _cluter
+        
+        elif not contg:
+            G_ = [self.G.subgraph(c).copy() for c in nx.connected_components(self.G)]
+            node_vector = []
+            for gsub in G_:
+                node_vector.extend(list(gsub.nodes))
+                for j in gsub.nodes:
+                    try:
+                        _eccen += [nx.eccentricity(gsub,j)]
+                        _cluter += [nx.clustering(gsub,j)]
+                    except:
+                        print("{j}th is Wrong")
+                        _eccen +=[0]
+                        _cluter += [0]
+
+            ordered_nodes = list(np.arange(0,len(self.G.nodes)))
+            indices_to_reorder = np.argsort([ordered_nodes.index(item) for item in node_vector])
+            self._eccen = _eccen
+            self._cluter = _cluter
+            self.indices_to_reorder = indices_to_reorder
+
+    def get_input_features(self, srm, R):
+        self.R = R
+        self.srm = srm
+        self.total_samples = srm.shape[0]
+        f = []
+        self.get_universal_features()
+        self.node_rxn_labels = {n:srm.columns[i] for i, n in enumerate(self.G.nodes)}
+        contg = nx.is_connected(self.G)
+        if contg:
+            for s, samp in enumerate(srm.index):
+                print(f'First features:{s}')
+                feature_vector = []
+                g = self.G.copy()
+                for j in g.nodes:
+                    try:
+                        _exp = srm.iloc[s, j]
+                        neighbors = [e[1] for e in self.edge_list if e[0] == j]
+                        neighbor_ids = [self.node_rxn_labels[n] for n in neighbors]
+                        _deg = np.sum(srm[neighbor_ids].iloc[s,:])
+                        _deg = np.abs(_deg)
+                        _deg = np.sqrt(_deg)
+                    except:
+                        _exp = 0
+                        _deg = 0
+                    feature_vector.append([self._eccen[j],self._cluter[j], _exp, _deg])
+                f += [feature_vector]
+        elif not contg:
+            G_ = [self.G.subgraph(c).copy() for c in nx.connected_components(self.G)]
+            for s, samp in enumerate(srm.index):
+                print(s)
+                g = G_.copy()
+                feature_vector = [] 
+                for gsub in G_:
+                    edge_list = G2edgeindex(gsub)
+                    for j in gsub.nodes:
+                        try:
+                            _exp = np.abs(srm.iloc[s, j])
+                            neighbors = [e[1] for e in edge_list if e[0] == j]
+                            neighbor_ids = [self.node_rxn_labels[n] for n in neighbors]
+                            _deg = np.sum(srm[neighbor_ids].iloc[s,:])
+                            _deg = np.abs(_deg)
+                            _deg = np.sqrt(_deg)
+                        except:
+                            _exp = 0
+                            _deg = 0
+                        feature_vector.append([self._eccen[j],self._cluter[j], _exp, _deg])
+                feature_vector = [feature_vector[i] for i in self.indices_to_reorder]
+                f += [feature_vector]
+        self.f = f
+
+        return self.f
+    
