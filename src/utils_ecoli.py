@@ -1,99 +1,41 @@
 from utils import *
-import torch
+from GSMM import *
 
-from torch.optim import Adam
-from torch.nn import ReLU
-from torch.nn import Linear
-from torch.nn import Sigmoid
-from torch.nn import BatchNorm1d
-from torch.nn import Sequential
-import torch.nn.functional as F
-from torch_geometric.data import DataLoader
-from torch_geometric.nn import GCNConv
-from torch_geometric.nn import GINConv
-from torch_geometric.nn import MLP
-
-from utils_ecoli import *
 from sklearn.preprocessing import MinMaxScaler
-
-import time, argparse
 from scipy.optimize import linprog
 method = 'simplex'
 options = {'tol': 1e-6}
 
 #############################################
-#FBA gt
-#############################################
+############################################# #FBA gt
 
-from GSMM import *
-
-
-
-
-def run_gt_solutions(G, srm, R, metabolic_model, inplace = False):
-    from utils_ecoli import FBA_ecoli
-
-
-    node_rxn_labels = {n:srm.columns[i] for i, n in enumerate(G.nodes)}
-    graph = base_graph(G)
-    f = graph.get_input_features(srm, R)
-    mw_nodes, mw_weights = graph.gt_clique()
-
-    FBA = FBA_ecoli(metabolic_model, ATP = 8.39, glucose = -10)
-    bounds = FBA.get_constrained_bounds(R, bound_scale = 1)
-    bio_c, clique_c = FBA.get_objective_functions(mw_nodes, with_biomass = False, b_weight = 0.8)
-
-    RES_bio, solutions_bio, failed_bio = FBA.get_solutions(bio_c)
-    RES_clique, solutions_clique, failed_clique = FBA.get_solutions(clique_c)
-
-    failed = failed_bio + failed_clique
-    if failed > 0:
-        raise ValueError("An error occurred")
-    return f, mw_nodes, mw_weights, bounds, bio_c, clique_c, RES_bio, RES_clique
-
-
-
-def gt_clique(base_graph):
-    mw_nodes = {}
-    mw_weights = {}
-    for j, samp_id in enumerate(base_graph.srm.index):
-        G_ = base_graph.G.copy()
-        G_exp = {}
-        for i, n in enumerate(G_.nodes):
-            n_exp = base_graph.srm.iloc[j,i]
-            G_exp[n] = int(n_exp) 
-        nx.set_node_attributes(G_, G_exp, "G_exp")
-        mw_nd, mw_wt = nx.max_weight_clique(G_, weight="G_exp")
-        mw_nodes[j] = mw_nd
-        mw_weights[j] = mw_wt
-    return mw_nodes, mw_weights
-
-
-
-######################################################################
-######################################################################
 
 
 class FBA_ecoli():
-    def __init__(self, model, ATP = 8.39, glucose = -10):
-        self.model = model
-        self.S = model.S_matrix.to_numpy()
+    def __init__(self, base_graph, ATP = 8.39, glucose = -10, verbose = True):
+        self.base_graph = base_graph
+        self.m_model = base_graph.m_model
+        self.S = base_graph.m_model.S_matrix.to_numpy()
         self.n_reaction = self.S.shape[1]
         self.ATP = ATP
         self.glucose = glucose
         #self.oxygen = oxygen
-        self.ub = [x.ub for x in list(model.reactions.values())]
-        self.lb = [x.lb for x in list(model.reactions.values())]
+        self.R = self.base_graph.R
+        self.srm = self.base_graph.srm
+        self.ub = [x.ub for x in list(base_graph.m_model.reactions.values())]
+        self.lb = [x.lb for x in list(base_graph.m_model.reactions.values())]
 
-        for i, reaction in enumerate(model.reactions.values()):
+        for i, reaction in enumerate(base_graph.m_model.reactions.values()):
             if isinstance(self.ATP, (int, float)):
                 if reaction.id == 'R_ATPM':
                     self.lb[i] = self.ATP
-                    print(reaction.id, 'bounds set to....... ', self.lb[51], self.ub[51])
+                    if verbose:
+                        print(reaction.id, 'bounds set to....... ', self.lb[51], self.ub[51])
             if isinstance(self.glucose, (int, float)):
                 if reaction.id == 'R_EX_glc__D_e':
                     self.lb[i] = self.glucose
-                    print(reaction.id, 'bounds set to....... ', self.lb[15], self.ub[15])
+                    if verbose:
+                        print(reaction.id, 'bounds set to....... ', self.lb[15], self.ub[15])
             elif reaction.is_exchange(): #
                 self.lb[i] = -1000
                 if reaction.reversible:
@@ -101,66 +43,86 @@ class FBA_ecoli():
                 else:
                     self.ub[i] = 0
 
-    def get_constrained_bounds(self, R, bound_scale = 1):
-        self.R = R
-        bounds = []
-
-        for s in range(0,R.shape[0]):
-            gene_expression = R.iloc[s,:]
-            ub_ = gene_expression * self.ub * bound_scale
-            lb_ = gene_expression * self.lb * bound_scale
-            bounds +=[np.c_[lb_,ub_]]
+    def get_constrained_bounds(self, bound_scale = 1):
+        sample_bounds = []
+        for s, samp in enumerate(self.R.index):
+            bounds = []
+            for s in range(0,self.R.shape[0]):
+                gene_expression = self.R.iloc[s,:]
+                ub_ = gene_expression * self.ub * bound_scale
+                lb_ = gene_expression * self.lb * bound_scale
+                bounds += [np.c_[lb_,ub_]]
+            sample_bounds += [bounds]
         self.bounds = bounds
-
         return self.bounds
+    
+    def get_gt_clique(self):
+        mw_nodes = []
+        mw_weights = []
+        for j, samp_id in enumerate(self.srm.index):
+            G_ = self.base_graph.G.copy()
+            G_exp = {}
+            for i, n in enumerate(G_.nodes):
+                n_exp = self.srm.iloc[j,i]
+                G_exp[n] = int(n_exp) 
+            nx.set_node_attributes(G_, G_exp, "G_exp")
+            mw_nd, mw_wt = nx.max_weight_clique(G_, weight="G_exp")
+            mw_nodes += [mw_nd]
+            mw_weights += [mw_wt]
+        self.mw_nodes = mw_nodes
+        self.mw_weights = mw_weights
+        mw_node_len = [len(c) for c in self.mw_nodes]
+        self.mw_node_len = mw_node_len
+        return mw_nodes, mw_weights, mw_node_len
 
-    def get_objective_functions(self, mw_nodes, with_biomass = False, b_weight = 0.8):
+    
+    def get_gt_obj(self, return_objectives = True, with_biomass = False, b_weight = 0.8):
+        self.G = self.base_graph.G
+        self.f = self.base_graph.f
 
-        bio_c = []
-        clique_c = []
-
+        #biomass
+        c = np.zeros(self.S.shape[1])
+        c[24] = -1 #biomass rxn idx
+        self.biomass_obj = c
+        #gt clique
+        cliques = []
         for s, b in enumerate(self.bounds):
-            #biomass
             c = np.zeros(self.S.shape[1])
-            c[24] = -1
-            bio_c.append(c)
-            #max wt clique
-            c = np.zeros(self.S.shape[1]) ##
-            obj_reactions = mw_nodes[s]
+            obj_reactions = self.mw_nodes[s]
             for n in obj_reactions:
                 c[n] = -1
             scaler = MinMaxScaler(feature_range=(-1, 0)) 
             c = scaler.fit_transform(np.array(c*self.R.iloc[s,:]).reshape(-1,1)).flatten()
             if with_biomass:
                 c[24] = b_weight
-            clique_c.append(c)
+            cliques += [c]
+        self.gt_clique_obj = cliques
+        if return_objectives:
+            return self.biomass_obj, self.gt_clique_obj
 
-        self.biomass_c = bio_c 
-        self.max_wt_clique_c = clique_c
-        return bio_c, clique_c
 
 
-    def get_solutions(self, c_list):
-        failed = 0
-        RES = []
-        solutions = []
 
-        for s, bounds_ in enumerate(self.bounds):
 
-            c = c_list[s]
-            try:
-                res = linprog(c,A_ub=None, b_ub=None, A_eq = self.S, b_eq = np.zeros(self.S.shape[0]),
-                    bounds=bounds_) #, method= method
-                if res.success and res.status == 0:
-                    RES.append(res)
-                    solutions.append(res.x)
-                else:
-                    print(f'failed........{s, self.R.index[s]} with error {res.status}')
-                    failed +=1
-            except:
-                print(f'failed to run')
-        return RES, solutions, failed
+
+
         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -321,7 +283,7 @@ for n in range(2):
          run_gt_solutions(G, srm, R, metabolic_model, inplace = True)
 '''
 
-
+'''
 def augment_genelevel_data(metabolic_model, data_norm, noise_std, new_samp_number = 3000, scales = 3):
     model = metabolic_model
     if 'gene_exp_scale' not in globals():
@@ -410,3 +372,4 @@ def augment_rxnlevel_data(metabolic_model, data_norm, noise_std, new_samp_number
         
         data_dict[lab] = new_data
     return data_dict
+'''
