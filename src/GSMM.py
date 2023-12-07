@@ -1,10 +1,10 @@
-from utils import *
 
 import libsbml
 import scipy
 import networkx as nx
+import numpy as np
 
-
+from utils import *
 
 ##############################################################################
 ############################################################################## init
@@ -379,6 +379,11 @@ def merge_tx_model(model, R, srm, plot = False):
 
 class base_graph():
     def __init__(self, G, metabolic_model):
+        from utils import sparse_mx_to_torch_sparse_tensor
+        from utils import G2edgeindex
+        from utils import to_sparse_mx
+        import torch
+
         self.m_model = metabolic_model
         self.G = G
         self.N = len(G.nodes)
@@ -442,7 +447,6 @@ class base_graph():
         contg = nx.is_connected(self.G)
         if contg:
             for s, samp in enumerate(srm.index):
-                print(f'First features:{s}')
                 feature_vector = []
                 g = self.G.copy()
                 for j in g.nodes:
@@ -461,7 +465,7 @@ class base_graph():
         elif not contg:
             G_ = [self.G.subgraph(c).copy() for c in nx.connected_components(self.G)]
             for s, samp in enumerate(srm.index):
-                print(s)
+
                 g = G_.copy()
                 feature_vector = [] 
                 for gsub in G_:
@@ -482,5 +486,4 @@ class base_graph():
                 f += [feature_vector]
         self.f = f
 
-        return self.f
     

@@ -1,6 +1,5 @@
 from utils import *
-from GSMM import *
-
+import networkx as nx
 from sklearn.preprocessing import MinMaxScaler
 from scipy.optimize import linprog
 method = 'simplex'
@@ -43,7 +42,7 @@ class FBA_ecoli():
                 else:
                     self.ub[i] = 0
 
-    def get_constrained_bounds(self, bound_scale = 1):
+    def get_constrained_bounds(self, bound_scale = 1, return_bounds = True):
         sample_bounds = []
         for s, samp in enumerate(self.R.index):
             bounds = []
@@ -54,9 +53,10 @@ class FBA_ecoli():
                 bounds += [np.c_[lb_,ub_]]
             sample_bounds += [bounds]
         self.bounds = bounds
-        return self.bounds
+        if return_bounds:
+            return bounds
     
-    def get_gt_clique(self):
+    def get_gt_clique(self, return_vals = True):
         mw_nodes = []
         mw_weights = []
         for j, samp_id in enumerate(self.srm.index):
@@ -73,7 +73,8 @@ class FBA_ecoli():
         self.mw_weights = mw_weights
         mw_node_len = [len(c) for c in self.mw_nodes]
         self.mw_node_len = mw_node_len
-        return mw_nodes, mw_weights, mw_node_len
+        if return_vals:
+            return mw_nodes, mw_weights, mw_node_len
 
     
     def get_gt_obj(self, return_objectives = True, with_biomass = False, b_weight = 0.8):
@@ -103,7 +104,47 @@ class FBA_ecoli():
 
 
 
+    def get_lp_solutions(self, S_matrix, return_vals = True):
+        from scipy.optimize import linprog
 
+        RES_b = []
+        RES_c = []
+        solutions_b = []
+        solutions_c = []
+        failed = 0
+        f_rm = []
+
+        for h  in range(self.base_graph.N):
+            bounds = self.bounds[h]
+            c_b = self.biomass_obj
+            c_c = self.gt_clique_obj[h]
+
+            res_b = linprog(c_b,A_ub=None, b_ub=None, A_eq = S_matrix, b_eq = np.zeros(S_matrix.shape[0]),
+                            bounds=bounds)
+            
+            res_c = linprog(c_c,A_ub=None, b_ub=None, A_eq = S_matrix, b_eq = np.zeros(S_matrix.shape[0]),
+                            bounds=bounds)
+            
+            if res_b.success and res_c.success:
+                RES_b.append(res_b)
+                RES_c.append(res_c)
+                solutions_b.append(res_b.x)
+                solutions_c.append(res_c.x)
+            
+            else:
+                # print(f'failed.......')
+                failed += 1
+                f_rm += [h]
+
+        self.RES_b = RES_b
+        self.RES_c = RES_c
+        self.solutions_b = solutions_b
+        self.solutions_c = solutions_c
+        self.failed = failed
+        self.f_rm = f_rm
+        
+        if return_vals:
+            return RES_b, RES_c, solutions_b, solutions_c, failed, f_rm
 
 
         

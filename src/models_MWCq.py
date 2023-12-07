@@ -1,4 +1,4 @@
-from utils import *
+
 import numpy as np
 
 import networkx as nx
@@ -10,6 +10,7 @@ from torch import tensor
 from torch.nn import Parameter
 import torch.nn.functional as F
 from torch_geometric.data import Data
+from torch.utils.data import DataLoader
 from torch_geometric.utils import sparse
 from torch_geometric.utils import to_scipy_sparse_matrix
 from torch_geometric.data import Data
@@ -18,6 +19,9 @@ import scipy.sparse as sp
 from sklearn.preprocessing import normalize
 import time
 import random
+
+from utils import *
+
 
 #############################################
 ############################################# #utils
@@ -248,70 +252,6 @@ class scattering_GNN(nn.Module):
 
 
 
-#############################################
-############################################# #decoder
-
-import time
-
-def test(model, graph, loader,  walkerstart=0,  Numofwalkers = 10,thresholdloopnodes = None):
-    N = graph.N
-    if thresholdloopnodes is None:
-        thresholdloopnodes = N
-
-    index = 0
-    clilist = []
-    timelist = []
-    model.eval()
-
-    with torch.no_grad():
-        for i, batch in enumerate(loader):
-            for j in range(len(batch)): 
-                t_0 = time.time()
-                features = torch.FloatTensor(batch[j].x)
-                output_dis = model(features)
-
-                predC = []
-                for walkerS in range(0,min(Numofwalkers,N)):
-                    p_c = decoder(graph, output_dis, 
-                                  walkerstart=walkerstart,  Numofwalkers = Numofwalkers,thresholdloopnodes=thresholdloopnodes)
-                    predC += [p_c]
-                
-                cliques = max(predC)
-                clilist += [cliques]
-                t_pred = time.time() - t_0 
-                timelist += [t_pred]
-    return clilist,timelist
-
-
-
-
-def decoder(graph, output_dis, walkerstart=0, Numofwalkers = 10, thresholdloopnodes=None):
-    N = graph.N
-    if thresholdloopnodes is None:
-        thresholdloopnodes = N
-    edge_index = graph.edge_index
-    adjmatrix = to_sparse_mx(edge_index, N)
-
-    _sorted, indices = torch.sort(output_dis.squeeze(),descending=True)
-    initiaprd = 0.*indices  # torch zeros
-    initiaprd = initiaprd.numpy() 
-    for walker in range(min(Numofwalkers,N)):
-        if walker < walkerstart:
-            initiaprd[indices[walker]] = 0.
-        else:
-            pass
-        
-        initiaprd[indices[walkerstart]] = 1. 
-        for clq in range(walkerstart+1,min(thresholdloopnodes,N)):
-            initiaprd[indices[clq]] = 1.
-            binary_vec = np.reshape(initiaprd, (-1,1))
-            ZorO = np.sum(binary_vec)**2  - np.sum(binary_vec) - np.sum(binary_vec*(adjmatrix.dot(binary_vec)))
-            if ZorO < 0.0001: # same as ZorO == 0
-                pass
-            else:
-                initiaprd[indices[clq]] = 0.
-        return np.sum(initiaprd)
-        
 
 
 
@@ -321,55 +261,3 @@ def decoder(graph, output_dis, walkerstart=0, Numofwalkers = 10, thresholdloopno
 
 
 
-
-
-
-
-
-#############################################
-############################################# #archive/QC code
-
-'''
-train_test = [b for i, b in enumerate(train_loader)]
-features = torch.FloatTensor(train_test[0][0].x)
-
-#test_loss
-output = model(features)
-w_exp = torch.tensor([feat[2].item() for feat in features]) 
-retdict = exploss(model.graph, output, penalty_coefficient, w_exp = w_exp)
-retdict
-#test_loss
-train(model, 0, train_loader, optimizer, penalty_coefficient, verbose=False)
-#test_loss
-output = model(features)
-w_exp = torch.tensor([feat[2].item() for feat in features]) 
-retdict = exploss(model.graph, output, penalty_coefficient, w_exp = w_exp)
-retdict
-'''
-
-
-
-def getclicnum(adjmatrix,dis,walkerstart = 0,thresholdloopnodes = 50):
-    '''
-    ComplementedgeM: complement matrix of adj 
-    dis: distribution on the nodes, higher ->better
-    cpu: cpu is usually better for small model
-    '''
-    _sorted, indices = torch.sort(dis.squeeze(),descending=True)#flatten, elements are sorted in descending order by value.
-    initiaprd = 0.*indices  # torch zeros
-    initiaprd = initiaprd.cpu().numpy() 
-    for walker in range(min(thresholdloopnodes,adjmatrix.get_shape()[0])):
-        if walker < walkerstart:
-            initiaprd[indices[walker]] = 0.
-        else:
-            pass
-    initiaprd[indices[walkerstart]] = 1. # the one with walkerstart'th largest prob is in the clique, start with walkerstart
-    for clq in range(walkerstart+1,min(thresholdloopnodes,adjmatrix.get_shape()[0])): # loop the 50 high prob nodes
-        initiaprd[indices[clq]] = 1.
-        binary_vec = np.reshape(initiaprd, (-1,1)) 
-        ZorO = np.sum(binary_vec)**2  - np.sum(binary_vec) - np.sum(binary_vec*(adjmatrix.dot(binary_vec)))
-        if ZorO < 0.0001: # same as ZorO == 0
-            pass
-        else:
-            initiaprd[indices[clq]] = 0.
-    return np.sum(initiaprd)
