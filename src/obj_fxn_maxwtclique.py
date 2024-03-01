@@ -109,6 +109,7 @@ def train(model, epoch, train_loader, optimizer, penalty_coefficient, verbose = 
 def plot_support(model, batch, ax = None):
     import matplotlib.pyplot as plt
     #fig, ax = plt.subplots()
+
     for j in range(len(batch)):
         features = torch.FloatTensor(batch[j].x)
         output = model(features)
