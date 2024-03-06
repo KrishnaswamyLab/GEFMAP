@@ -114,7 +114,8 @@ class FBA_ecoli():
         failed = 0
         f_rm = []
 
-        for h  in range(self.base_graph.N):
+        #for h  in range(self.base_graph.N):
+        for h in range(self.base_graph.total_samples):
             bounds = self.bounds[h]
             c_b = self.biomass_obj
             c_c = self.gt_clique_obj[h]
